@@ -251,17 +251,11 @@ const EventManagement: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Event Management Section</h1>
           
           <div className="flex items-center gap-4">
-            {/* Filter Button */}
-            <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors">
-              <Filter className="w-4 h-4" />
-              Filter
-            </button>
-
+            <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors"><Filter className="w-4 h-4" />Filter</button>
             {/* Search Bar */}
             <div className="relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />

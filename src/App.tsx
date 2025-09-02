@@ -9,6 +9,8 @@ import EventAttendeeInsights from "./features/attendenceDetails/attendenceDetail
 import ProtectedRoute from "./features/auth/ProtectedRoute";
 import { PasswordResetFlow } from "./features/auth/components/ForgotPassword.page";
 import DashboardLayout from "./features/dashboard/components/DashboardLayout";
+import CreateEventPage from "./features/events/components/CreateEventPage";
+import CreateCategoryPage from "./features/categories/components/createCategory";
 
 function App() {
   return (
@@ -22,48 +24,27 @@ function App() {
           element={<PasswordResetFlow />} 
         />
         
-        {/* Dashboard Routes - With Sidebar */}
-        <Route 
-          path="/dashboard/*" 
-          element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }
-        >
+        <Route path="/dashboard/*" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
           {/* Nested routes inside dashboard layout */}
           <Route index element={<Dashboard />} />
           <Route path="events" element={<EventManagement />} />
+          <Route path="events/create" element={<CreateEventPage />} />
           <Route path="events/:id" element={<EventDetailsPage />} />
           <Route path="attendees" element={<AttendeeInsights />} />
           <Route path="attendees/:id" element={<EventAttendeeInsights />} />
+
+          {/* Categories */}
+          <Route path="categories/create" element={<CreateCategoryPage />} />
         </Route>
 
-        {/* Events Management Route */}
-        <Route 
-          path="/events" 
-          element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }
-        >
+
+        {/* Events Management Routes */}
+        <Route  path="/events"  element={ <ProtectedRoute> <DashboardLayout /> </ProtectedRoute>}>
           <Route index element={<EventManagement />} />
+          <Route path="create" element={<CreateEventPage />} />
+          <Route path=":id" element={<EventDetailsPage />} />
         </Route>
 
-        {/* Individual Event Details Route */}
-        <Route 
-          path="/events/:id" 
-          element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<EventDetailsPage />} />
-        </Route>
-
-        {/* Attendee Insights Route */}
         <Route 
           path="/attendees" 
           element={
@@ -73,24 +54,9 @@ function App() {
           }
         >
           <Route index element={<AttendeeInsights />} />
+          <Route path=":id" element={<EventAttendeeInsights />} />
         </Route>
-
-        {/* Event Attendee Insights Route */}
-        <Route 
-          path="/attendees/:id" 
-          element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<EventAttendeeInsights />} />
-        </Route>
-
-        {/* Redirect root to login or dashboard based on auth */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
-        {/* Catch all route - 404 */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>

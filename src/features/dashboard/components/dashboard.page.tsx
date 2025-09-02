@@ -58,8 +58,8 @@ const Dashboard = () => {
   };
   const totalEngagement = engagementData.reduce((sum, item) => sum + item.value, 0);
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-gray-900 text-white px-6 py-4">
+    <div className="min-h-screen bg-gray-50 rounded-lg pt-3">
+      <header className="bg-black text-white px-6 py-4 mx-2 rounded-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center">

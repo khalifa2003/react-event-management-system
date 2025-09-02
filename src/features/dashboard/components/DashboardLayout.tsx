@@ -34,7 +34,7 @@ const DashboardLayout: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen">
       <div className={`${isMobile ? (mobileMenuOpen ? 'block' : 'hidden') : 'block'}`}>
         <Sidebar collapsed={isMobile ? false : sidebarCollapsed} onToggle={closeMobileMenu}/>
       </div>
@@ -44,7 +44,7 @@ const DashboardLayout: React.FC = () => {
         <span className="absolute right-full top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 translate-x-2 bg-gray-800 text-white px-3 py-1 rounded-l-lg whitespace-nowrap transition-all duration-300">Open Sidebar</span>
       </button>
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
-          <div className="container mx-auto px-4 py-6">
+          <div className="container-fluid mx-auto px-4 py-6 bg-black">
             <Outlet />
           </div>
         </main>
