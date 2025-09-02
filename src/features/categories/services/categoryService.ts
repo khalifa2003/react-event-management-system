@@ -45,7 +45,7 @@ class CategoryService {
     const formData = new FormData();
     if (updateData.name) formData.append('name', updateData.name);
     if (updateData.description) formData.append('description', updateData.description);
-    if (updateData.image instanceof File) {
+    if (updateData.image) {
       formData.append('image', updateData.image);
     }
     if (updateData.color) formData.append('color', updateData.color);

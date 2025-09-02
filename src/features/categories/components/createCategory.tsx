@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { categoryService } from '../services/categoryService';
 import type { CategoryFormData } from '../interfaces/Category';
 import type { CreateCategoryRequest } from '../interfaces/Category';
+import { useNavigate } from 'react-router-dom';
 
 const InputField = ({
   label,
@@ -64,12 +65,9 @@ const InputField = ({
   </div>
 );
 
-// Helper function to validate hex color
 const isValidHexColor = (color: string): boolean => {
   return /^#[0-9A-Fa-f]{6}$/.test(color);
 };
-
-// Helper function to transform form data
 const mapFormDataToCreateCategoryRequest = (
   formData: CategoryFormData
 ): CreateCategoryRequest => {
@@ -83,10 +81,11 @@ const mapFormDataToCreateCategoryRequest = (
 };
 
 const CreateCategoryPage = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<CategoryFormData>({
     name: '',
     description: '',
-    image: '',       // ✅ URL string
+    image: '',
     color: '#3B82F6',
     isActive: true,
   });
@@ -139,13 +138,7 @@ const CreateCategoryPage = () => {
       const categoryData = mapFormDataToCreateCategoryRequest(formData);
       await categoryService.createCategory(categoryData);
       toast.success('Category created successfully!');
-      setFormData({
-        name: '',
-        description: '',
-        image: '',
-        color: '#3B82F6',
-        isActive: true,
-      });
+      navigate('/dashboard/categories');
     } catch (error: any) {
       const message =
         error.response?.data?.message ||

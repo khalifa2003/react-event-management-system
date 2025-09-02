@@ -1,26 +1,10 @@
-// src/components/auth/ProtectedRoute.tsx
-import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "./services/useAuth";
 
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-}
+const ProtectedRoute = () => {
+  const { isAuthenticated } = useAuth();
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  // Check if user is authenticated
-  // This is just an example - replace with your actual auth logic
-  const isAuthenticated = () => {
-    const token = localStorage.getItem('token');
-    // Add more sophisticated auth checking here
-    return !!token;
-  };
-
-  if (!isAuthenticated()) {
-    // Redirect to login if not authenticated
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoute;
