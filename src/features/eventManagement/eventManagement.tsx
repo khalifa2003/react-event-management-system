@@ -1,5 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Filter, Calendar, Plus, MoreVertical, Music, Car, Palette, BookOpen, Utensils, Laptop, Sparkles, Trophy } from 'lucide-react';
+import { eventService } from '../events/services/eventService';
+import type { EventListResponse } from '../events/interfaces/events';
 
 interface Event {
   id: string;
@@ -14,162 +17,96 @@ interface Event {
   time: string;
 }
 
+// Map category names to icons
+const categoryIconMap: { [key: string]: React.ReactNode } = {
+  music: <Music className="w-5 h-5" />,
+  car: <Car className="w-5 h-5" />,
+  art: <Palette className="w-5 h-5" />,
+  literary: <BookOpen className="w-5 h-5" />,
+  food: <Utensils className="w-5 h-5" />,
+  tech: <Laptop className="w-5 h-5" />,
+  fireworks: <Sparkles className="w-5 h-5" />,
+  sports: <Trophy className="w-5 h-5" />,
+};
+
 const EventManagement: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('Status');
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const events: Event[] = [
-    {
-      id: '1',
-      title: 'Colombo Music Festival',
-      icon: <Music className="w-5 h-5" />,
-      status: 'upcoming',
-      price: 5000,
-      originalPrice: 2500,
-      attendees: 1800,
-      venue: 'Open Air Theater, Colombo',
-      date: '12 April 2025',
-      time: '09:00PM to 11:30PM'
-    },
-    {
-      id: '2',
-      title: 'Lanka Supercar Show',
-      icon: <Car className="w-5 h-5" />,
-      status: 'pending',
-      price: 3000,
-      originalPrice: 2500,
-      attendees: 0,
-      venue: 'Lanka Supercar Show',
-      date: '15 April 2025',
-      time: '09:00PM to 11:30PM'
-    },
-    {
-      id: '3',
-      title: 'Rock & Roll Night',
-      icon: <Music className="w-5 h-5" />,
-      status: 'closed',
-      price: 3000,
-      originalPrice: 1500,
-      attendees: 1500,
-      venue: 'Open Air Theater, Colombo',
-      date: '03 March 2025',
-      time: '09:00PM to 11:30PM'
-    },
-    {
-      id: '4',
-      title: 'Galle Literary Fair',
-      icon: <BookOpen className="w-5 h-5" />,
-      status: 'upcoming',
-      price: 2000,
-      originalPrice: 1500,
-      attendees: 600,
-      venue: 'Open Air Theater, Galle',
-      date: '14 April 2025',
-      time: '09:00AM to 12:00PM'
-    },
-    {
-      id: '5',
-      title: 'Kandy Art Exhibition',
-      icon: <Palette className="w-5 h-5" />,
-      status: 'pending',
-      price: 4000,
-      originalPrice: 750,
-      attendees: 0,
-      venue: 'Open Air Theater, Colombo',
-      date: '19 April 2025',
-      time: '09:00PM to 11:30PM'
-    },
-    {
-      id: '6',
-      title: 'Sri Lanka Food Fest',
-      icon: <Utensils className="w-5 h-5" />,
-      status: 'closed',
-      price: 2000,
-      originalPrice: 700,
-      attendees: 600,
-      venue: 'Open Air Theater, Colombo',
-      date: '02 March 2025',
-      time: '09:00PM to 11:30PM'
-    },
-    {
-      id: '7',
-      title: 'Tech Lanka Expo 2025',
-      icon: <Laptop className="w-5 h-5" />,
-      status: 'upcoming',
-      price: 1000,
-      originalPrice: 800,
-      attendees: 400,
-      venue: 'Open Air Theater, Colombo',
-      date: '18 April 2025',
-      time: '10:00AM to 01:30PM'
-    },
-    {
-      id: '8',
-      title: "New Year's Eve Fireworks",
-      icon: <Sparkles className="w-5 h-5" />,
-      status: 'pending',
-      price: 1500,
-      originalPrice: 1500,
-      attendees: 0,
-      venue: 'Open Air Theater, Colombo',
-      date: '24 April 2025',
-      time: '09:00PM to 11:30PM'
-    },
-    {
-      id: '9',
-      title: 'Colombo Music Festival',
-      icon: <Music className="w-5 h-5" />,
-      status: 'closed',
-      price: 5000,
-      originalPrice: 1500,
-      attendees: 1100,
-      venue: 'Open Air Theater, Colombo',
-      date: '24 February 2025',
-      time: '09:00PM to 11:30PM'
-    },
-    {
-      id: '10',
-      title: 'Jaffna Music Festival',
-      icon: <Music className="w-5 h-5" />,
-      status: 'upcoming',
-      price: 0,
-      originalPrice: 0,
-      attendees: 0,
-      venue: '',
-      date: '',
-      time: ''
-    },
-    {
-      id: '11',
-      title: 'Matara Car Show',
-      icon: <Car className="w-5 h-5" />,
-      status: 'upcoming',
-      price: 0,
-      originalPrice: 0,
-      attendees: 0,
-      venue: '',
-      date: '',
-      time: ''
-    },
-    {
-      id: '12',
-      title: 'Cricket Festival',
-      icon: <Trophy className="w-5 h-5" />,
-      status: 'upcoming',
-      price: 0,
-      originalPrice: 0,
-      attendees: 0,
-      venue: '',
-      date: '',
-      time: ''
-    }
-  ];
+  // Fetch events
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response: EventListResponse = await eventService.getEvents();
+        const mappedEvents: Event[] = response.data.map(event => {
+          const dateTimeStart = new Date(event.dateTime.start);
+          const dateTimeEnd = new Date(event.dateTime.end);
+          const date = dateTimeStart.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+          const time = `${dateTimeStart.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} to ${dateTimeEnd.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+          
+          // Determine status based on dates
+          const now = new Date();
+          let status: 'upcoming' | 'pending' | 'closed' = 'upcoming';
+          if (now > dateTimeEnd) {
+            status = 'closed';
+          } else if (now < dateTimeStart) {
+            status = 'pending';
+          }
+
+          // Map category name to icon (default to Music if unknown)
+          const categoryName = event.category.toString() || 'music';
+          const icon = categoryIconMap[categoryName] || <Music className="w-5 h-5" />;
+
+          return {
+            id: event._id.toString(),
+            title: event.title,
+            icon,
+            status,
+            price: event.pricing.ticketPrice,
+            originalPrice: event.pricing.earlyBird?.price,
+            attendees: event.capacity.totalSeats, // Adjust based on actual attendees field if available
+            venue: `${event.venue.name}, ${event.venue.city}`,
+            date,
+            time,
+          };
+        });
+        setEvents(mappedEvents);
+        setIsLoading(false);
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error
+            ? 'Failed to fetch events'
+            : 'An unknown error occurred';
+        setError(errorMessage);
+        setIsLoading(false);
+      }
+    };
+    fetchEvents();
+  }, []);
 
   const filteredEvents = useMemo(() => {
-    return events.filter(event =>
+    const sortedEvents = [...events];
+    if (sortBy === 'Date') {
+      sortedEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    } else if (sortBy === 'Name') {
+      sortedEvents.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortBy === 'Price') {
+      sortedEvents.sort((a, b) => a.price - b.price);
+    } else {
+      // Default: sort by status (upcoming, pending, closed)
+      sortedEvents.sort((a, b) => {
+        const statusOrder = { upcoming: 1, pending: 2, closed: 3 };
+        return statusOrder[a.status] - statusOrder[b.status];
+      });
+    }
+    return sortedEvents.filter(event =>
       event.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery, events]);
+  }, [searchQuery, events, sortBy]);
 
   const getStatusDot = (status: string) => {
     switch (status) {
@@ -248,8 +185,16 @@ const EventManagement: React.FC = () => {
   const pendingEvents = filteredEvents.filter(e => e.status === 'pending');
   const closedEvents = filteredEvents.filter(e => e.status === 'closed');
 
+  if (isLoading) {
+    return <div className="text-center p-6 text-gray-600">Loading events...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center p-6 text-red-500 bg-red-100 rounded">{error}</div>;
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="container-fluid min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Event Management Section</h1>
@@ -272,7 +217,10 @@ const EventManagement: React.FC = () => {
 
         {/* Controls */}
         <div className="flex items-center justify-between mb-6">
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <button 
+            onClick={() => navigate('/create-event')} 
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
             <Plus className="w-4 h-4" />
             New Event
           </button>

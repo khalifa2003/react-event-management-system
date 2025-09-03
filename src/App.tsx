@@ -4,7 +4,6 @@ import RegisterPage from "./features/auth/components/Register.page";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
 import { PasswordResetFlow } from "./features/auth/components/ForgotPassword.page";
 import DashboardLayout from "./features/dashboard/components/DashboardLayout";
-import CreateEventPage from "./features/events/components/CreateEventPage";
 import { Toaster } from "react-hot-toast";
 import CategoryManagement from "./features/categories/components/CategoryManagement";
 import CreateUser from "./features/users/components/CreateUser";
@@ -14,14 +13,16 @@ import EventAttendeeInsights from "./features/attendenceDetails/AttendenceDetail
 import CreateCategoryPage from "./features/categories/components/CreateCategory";
 import UpdateCategoryPage from "./features/categories/components/UpdateCategory";
 import Dashboard from "./features/dashboard/components/Dashboard.page";
-import EventDetailsPage from "./features/eventDetails/EventDetails";
 import EventManagement from "./features/eventManagement/EventManagement";
 import UsersList from "./features/users/components/UsersList";
 import UserProfile from "./features/users/components/UserProfile";
+import CreateEvent from "./features/events/components/CreateEventPage";
+// import EventDetailsPage from "./features/eventDetails/EventDetails";
 
 function App() {
   return (
     <Router>
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
       <Toaster />
       <Routes>
         {/* Public Routes */}
@@ -36,8 +37,8 @@ function App() {
           </Route>
           <Route path="/events/*" element={<DashboardLayout />}>
             <Route path="" element={<EventManagement />} />
-            <Route path="create" element={<CreateEventPage />} />
-            <Route path=":id" element={<EventDetailsPage />} />
+            <Route path="create" element={<CreateEvent />} />
+            {/* <Route path=":id" element={<EventDetailsPage />} /> */}
           </Route>
           <Route path="/attendees/*" element={<DashboardLayout />}>
             <Route path="" element={<AttendeeInsights />} />
