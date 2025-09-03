@@ -7,13 +7,17 @@ import DashboardLayout from "./features/dashboard/components/DashboardLayout";
 import CreateEventPage from "./features/events/components/CreateEventPage";
 import { Toaster } from "react-hot-toast";
 import CategoryManagement from "./features/categories/components/CategoryManagement";
-import AttendeeInsights from "./features/attendence/attendence";
-import EventAttendeeInsights from "./features/attendenceDetails/attendenceDetails";
-import CreateCategoryPage from "./features/categories/components/createCategory";
-import UpdateCategoryPage from "./features/categories/components/updateCategory";
-import Dashboard from "./features/dashboard/components/dashboard.page";
-import EventDetailsPage from "./features/eventDetails/eventDetails";
-import EventManagement from "./features/eventManagement/eventManagement";
+import CreateUser from "./features/users/components/CreateUser";
+import UpdateUser from "./features/users/components/UpdateUser";
+import AttendeeInsights from "./features/attendence/Attendence";
+import EventAttendeeInsights from "./features/attendenceDetails/AttendenceDetails";
+import CreateCategoryPage from "./features/categories/components/CreateCategory";
+import UpdateCategoryPage from "./features/categories/components/UpdateCategory";
+import Dashboard from "./features/dashboard/components/Dashboard.page";
+import EventDetailsPage from "./features/eventDetails/EventDetails";
+import EventManagement from "./features/eventManagement/EventManagement";
+import UsersList from "./features/users/components/UsersList";
+import UserProfile from "./features/users/components/UserProfile";
 
 function App() {
   return (
@@ -43,6 +47,12 @@ function App() {
             <Route path="" element={<CategoryManagement />} />
             <Route path="create" element={<CreateCategoryPage />} />
             <Route path=":id/edit" element={<UpdateCategoryPage />} />
+          </Route>
+          <Route path="/users/*" element={<DashboardLayout />}>
+            <Route path="" element={<UsersList />} />
+            <Route path="profile" element={<UserProfile />} />
+            <Route path="create" element={<CreateUser />} />
+            <Route path=":id/edit" element={<UpdateUser />} /> 
           </Route>
         </Route>
 

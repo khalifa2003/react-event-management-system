@@ -137,6 +137,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false, onToggle }) => {
           <div className="pt-4 pb-2 border-b border-white mx-2">
             <NavSection title="Account Management" collapsed={collapsed}>
               <NavItem icon={User} label="Manage Users" path="/users" collapsed={collapsed} />
+              <NavItem icon={User} label="Profile" path="/users/profile" collapsed={collapsed} />
               <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group text-gray-400 hover:text-white hover:bg-gray-800/50">
                 <LogOut size={18} className="group-hover:text-red-400 transition-colors" />
                 {!collapsed && <span className="text-sm font-medium flex-1 text-left">Logout</span>}

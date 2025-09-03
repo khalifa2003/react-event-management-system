@@ -7,31 +7,20 @@ const DashboardLayout: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-
   useEffect(() => {
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 1024);
-      if (window.innerWidth < 1024) {
-        setMobileMenuOpen(false); 
-      }
+      if (window.innerWidth < 1024) setMobileMenuOpen(false); 
     };
-
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
-
   const toggleSidebar = () => {
-    if (isMobile) {
-      setMobileMenuOpen(!mobileMenuOpen);
-    } else {
-      setSidebarCollapsed(!sidebarCollapsed);
-    }
+    if (isMobile) setMobileMenuOpen(!mobileMenuOpen);
+    else setSidebarCollapsed(!sidebarCollapsed);
   };
-
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false);
-  };
+  const closeMobileMenu = () => { setMobileMenuOpen(false) };
 
   return (
     <div className="flex h-screen">
@@ -44,7 +33,7 @@ const DashboardLayout: React.FC = () => {
         <span className="absolute right-full top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 translate-x-2 bg-gray-800 text-white px-3 py-1 rounded-l-lg whitespace-nowrap transition-all duration-300">Open Sidebar</span>
       </button>
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
-          <div className="container-fluid mx-auto px-4 py-6 bg-black">
+          <div className="container-fluid mx-auto px-4 py-6 bg-black min-h-screen">
             <Outlet />
           </div>
         </main>
