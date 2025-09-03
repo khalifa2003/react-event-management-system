@@ -19,18 +19,15 @@ export const eventService = {
     const response = await api.get(`/events${params.toString() ? `?${params.toString()}` : ''}`);
     return response.data;
   },
-
   async getPopularEvents(): Promise<EventListResponse> {
     const response = await api.get('/events/popular');
     return response.data;
   },
-
   async getMyEvents(status?: string): Promise<EventListResponse> {
     const params = status ? new URLSearchParams({ status }) : undefined;
     const response = await api.get(`/events/organizer/my-events${params ? `?${params.toString()}` : ''}`);
     return response.data;
   },
-
   async getEvent(id: string): Promise<EventResponse> {
     const response = await api.get(`/events/${id}`);
     return response.data;

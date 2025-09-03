@@ -13,12 +13,12 @@ import EventAttendeeInsights from "./features/attendenceDetails/AttendenceDetail
 import CreateCategoryPage from "./features/categories/components/CreateCategory";
 import UpdateCategoryPage from "./features/categories/components/UpdateCategory";
 import Dashboard from "./features/dashboard/components/Dashboard.page";
-import EventManagement from "./features/eventManagement/EventManagement";
+import EventManagement from "./features/events/components/EventManagement";
 import UsersList from "./features/users/components/UsersList";
 import UserProfile from "./features/users/components/UserProfile";
 import CreateEvent from "./features/events/components/CreateEventPage";
-// import EventDetailsPage from "./features/eventDetails/EventDetails";
-
+import EventDetailsPage from "./features/events/components/EventDetails";
+import UpdateEvent from "./features/events/components/UpdateEventPage";
 function App() {
   return (
     <Router>
@@ -38,7 +38,8 @@ function App() {
           <Route path="/events/*" element={<DashboardLayout />}>
             <Route path="" element={<EventManagement />} />
             <Route path="create" element={<CreateEvent />} />
-            {/* <Route path=":id" element={<EventDetailsPage />} /> */}
+            <Route path=":id/edit" element={<UpdateEvent />} />
+            <Route path=":id" element={<EventDetailsPage />} />
           </Route>
           <Route path="/attendees/*" element={<DashboardLayout />}>
             <Route path="" element={<AttendeeInsights />} />

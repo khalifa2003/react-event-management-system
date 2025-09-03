@@ -105,7 +105,7 @@ export interface Event {
   slug: string;
   description: string;
   shortDescription?: string;
-  category: string | Category;
+  category: Category;
   organizer: string | User;
   coverImage: string;
   venue: Venue;
@@ -141,7 +141,7 @@ export interface CreateEventData {
     availableSeats: number;
     soldSeats: number;
   };
-  status?: "draft" | "published";
+  status: "draft" | "published" | 'cancelled' | 'completed';
   tags?: string;
   features?: string;
   ageRestriction?: AgeRestriction;
@@ -197,10 +197,4 @@ export interface EventListResponse {
 export interface EventResponse {
   status: "success";
   data: Event;
-}
-
-export interface CategoriesResponse {
-  status: "success";
-  results: number;
-  data: Category[];
 }

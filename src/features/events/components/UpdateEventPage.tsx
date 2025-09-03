@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import { eventService } from '../services/eventService';
 import { categoryService } from '../../categories/services/categoryService';
-import type { UpdateEventData, Event, Category } from '../interfaces/events';
+import type { CreateEventData, Category } from '../interfaces/events';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import type { CategoriesResponse } from '../../categories/interfaces/Category';
@@ -19,7 +19,22 @@ L.Icon.Default.mergeOptions({
 const UpdateEvent: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<UpdateEventData>({});
+  const [formData, setFormData] = useState<CreateEventData>({
+    title: '',
+    description: '',
+    shortDescription: '',
+    category: '',
+    coverImage: '',
+    venue: { name: '', address: '', city: '', coordinates: { lat: undefined, lng: undefined } },
+    dateTime: { start: '', end: '' },
+    pricing: { ticketPrice: 0, currency: 'EGP', earlyBird: { price: undefined, deadline: undefined } },
+    capacity: { totalSeats: 0, availableSeats: 0, soldSeats: 0 },
+    status: 'draft',
+    tags: '',
+    features: '',
+    ageRestriction: { minAge: undefined, maxAge: undefined },
+    socialLinks: { website: '', facebook: '', twitter: '', instagram: '' },
+  });
   const [categories, setCategories] = useState<Category[]>([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -34,53 +49,73 @@ const UpdateEvent: React.FC = () => {
         return;
       }
       try {
-        // Fetch event
         const eventResponse = await eventService.getEvent(id);
-        const event: Event = eventResponse.data;
+        const event = eventResponse.data;
+        const categoriesResponse: CategoriesResponse = await categoryService.getCategories();
+        setCategories(categoriesResponse.data);
+
+        // Safely handle category ID
+        const categoryId = typeof event.category === 'object' && event.category?._id
+          ? event.category._id
+          : event.category || '';
+
         setFormData({
           title: event.title || '',
           description: event.description || '',
           shortDescription: event.shortDescription || '',
-          category: typeof event.category === 'string' ? event.category : event.category._id.toString(),
-          venue: event.venue,
+          category: categoryId,
+          coverImage: event.coverImage || '',
+          venue: {
+            name: event.venue?.name || '',
+            address: event.venue?.address || '',
+            city: event.venue?.city || '',
+            coordinates: {
+              lat: event.venue?.coordinates?.lat,
+              lng: event.venue?.coordinates?.lng,
+            },
+          },
           dateTime: {
-            start: new Date(event.dateTime.start).toISOString().slice(0, 16),
-            end: new Date(event.dateTime.end).toISOString().slice(0, 16),
+            start: event.dateTime?.start ? new Date(event.dateTime.start).toISOString().slice(0, 16) : '',
+            end: event.dateTime?.end ? new Date(event.dateTime.end).toISOString().slice(0, 16) : '',
           },
           pricing: {
-            ticketPrice: event.pricing.ticketPrice,
-            currency: event.pricing.currency,
-            earlyBird: event.pricing.earlyBird
-              ? {
-                  price: event.pricing.earlyBird.price,
-                  deadline: event.pricing.earlyBird.deadline
-                    ? new Date(event.pricing.earlyBird.deadline).toISOString().slice(0, 16)
-                    : undefined,
-                }
-              : undefined,
+            ticketPrice: event.pricing?.ticketPrice || 0,
+            currency: event.pricing?.currency || 'EGP',
+            earlyBird: {
+              price: event.pricing?.earlyBird?.price,
+              deadline: event.pricing?.earlyBird?.deadline
+                ? new Date(event.pricing.earlyBird.deadline).toISOString().slice(0, 16)
+                : undefined,
+            },
           },
-          capacity: { totalSeats: event.capacity.totalSeats },
-          status: event.status,
-          tags: event.tags?.join(','),
-          features: event.features?.join(','),
-          ageRestriction: event.ageRestriction,
-          socialLinks: event.socialLinks,
-          isPopular: event.isPopular,
-          isFeatured: event.isFeatured,
+          capacity: {
+            totalSeats: event.capacity?.totalSeats || 0,
+            availableSeats: event.capacity?.availableSeats || 0,
+            soldSeats: event.capacity?.soldSeats || 0,
+          },
+          status: event.status || 'draft',
+          tags: Array.isArray(event.tags) ? event.tags.join(',') : event.tags || '',
+          features: Array.isArray(event.features) ? event.features.join(',') : event.features || '',
+          ageRestriction: {
+            minAge: event.ageRestriction?.minAge,
+            maxAge: event.ageRestriction?.maxAge,
+          },
+          socialLinks: {
+            website: event.socialLinks?.website || '',
+            facebook: event.socialLinks?.facebook || '',
+            twitter: event.socialLinks?.twitter || '',
+            instagram: event.socialLinks?.instagram || '',
+          },
         });
-
-        // Fetch categories
-        const categoriesResponse: CategoriesResponse = await categoryService.getCategories();
-        setCategories(categoriesResponse.data);
         setIsLoading(false);
-      } catch (error: any) {
+      } catch (err: unknown) {
+        setError('Failed to load event or categories');
         setIsLoading(false);
       }
     };
     fetchData();
   }, [id]);
 
-  // Component to handle map click events
   const MapClickHandler: React.FC<{ onLocationSelect: (lat: number, lng: number) => void }> = ({ onLocationSelect }) => {
     useMapEvents({
       click(e) {
@@ -98,26 +133,36 @@ const UpdateEvent: React.FC = () => {
   };
 
   const validateForm = () => {
-    if (formData.title && formData.title.length > 100) return 'Title cannot exceed 100 characters';
-    if (formData.description && formData.description.length > 2000) return 'Description cannot exceed 2000 characters';
+    if (!formData.title.trim()) return 'Event title is required';
+    if (formData.title.length > 100) return 'Title cannot exceed 100 characters';
+    if (!formData.description.trim()) return 'Event description is required';
+    if (formData.description.length > 2000) return 'Description cannot exceed 2000 characters';
     if (formData.shortDescription && formData.shortDescription.length > 200)
       return 'Short description cannot exceed 200 characters';
-    if (formData.category && !formData.category.match(/^[0-9a-fA-F]{24}$/)) return 'Valid category ID is required';
-    if (formData.venue?.coordinates?.lat && (formData.venue.coordinates.lat < -90 || formData.venue.coordinates.lat > 90))
+    if (!formData.category) return 'Category is required';
+    if (!formData.category.match(/^[0-9a-fA-F]{24}$/)) return 'Valid category ID is required';
+    if (!formData.coverImage) return 'Cover image is required';
+    if (!formData.venue.name.trim()) return 'Venue name is required';
+    if (!formData.venue.address.trim()) return 'Venue address is required';
+    if (!formData.venue.city.trim()) return 'City is required';
+    if (formData.venue.coordinates?.lat && (formData.venue.coordinates.lat < -90 || formData.venue.coordinates.lat > 90))
       return 'Latitude must be between -90 and 90';
-    if (formData.venue?.coordinates?.lng && (formData.venue.coordinates.lng < -180 || formData.venue.coordinates.lng > 180))
+    if (formData.venue.coordinates?.lng && (formData.venue.coordinates.lng < -180 || formData.venue.coordinates.lng > 180))
       return 'Longitude must be between -180 and 180';
-    if (formData.dateTime?.start && formData.dateTime?.end && new Date(formData.dateTime.end) <= new Date(formData.dateTime.start))
+    if (!formData.dateTime.start) return 'Start date is required';
+    if (!formData.dateTime.end) return 'End date is required';
+    if (new Date(formData.dateTime.end) <= new Date(formData.dateTime.start))
       return 'End date must be after start date';
-    if (formData.pricing?.ticketPrice && formData.pricing.ticketPrice < 0) return 'Ticket price cannot be negative';
-    if (formData.pricing?.earlyBird?.price && formData.pricing.earlyBird.price < 0)
+    if (formData.pricing.ticketPrice < 0) return 'Ticket price cannot be negative';
+    if (formData.pricing.earlyBird?.price && formData.pricing.earlyBird.price < 0)
       return 'Early bird price cannot be negative';
-    if (formData.pricing?.earlyBird?.deadline && new Date(formData.pricing.earlyBird.deadline) <= new Date())
+    if (formData.pricing.earlyBird?.deadline && new Date(formData.pricing.earlyBird.deadline) <= new Date())
       return 'Early bird deadline must be in the future';
-    if (formData.capacity?.totalSeats && formData.capacity.totalSeats < 1) return 'Must have at least 1 seat';
+    if (formData.capacity.totalSeats < 1) return 'Must have at least 1 seat';
     if (formData.status && !['draft', 'published', 'cancelled', 'completed'].includes(formData.status))
       return 'Invalid status';
-    if (formData.ageRestriction?.minAge && formData.ageRestriction.minAge < 0) return 'Minimum age cannot be negative';
+    if (formData.ageRestriction?.minAge && formData.ageRestriction.minAge < 0)
+      return 'Minimum age cannot be negative';
     if (formData.ageRestriction?.maxAge && formData.ageRestriction.maxAge > 120)
       return 'Maximum age cannot exceed 120';
     if (formData.socialLinks?.website && !formData.socialLinks.website.match(/^https?:\/\/.+/))
@@ -128,7 +173,6 @@ const UpdateEvent: React.FC = () => {
       return 'Invalid Twitter URL';
     if (formData.socialLinks?.instagram && !formData.socialLinks.instagram.match(/^https?:\/\/(www\.)?instagram\.com\/.+/))
       return 'Invalid Instagram URL';
-      return 'Each additional image must be under 5MB';
     return '';
   };
 
@@ -141,28 +185,27 @@ const UpdateEvent: React.FC = () => {
     }
 
     const data = new FormData();
-    if (formData.title) data.append('title', formData.title);
-    if (formData.description) data.append('description', formData.description);
+    data.append('title', formData.title);
+    data.append('description', formData.description);
     if (formData.shortDescription) data.append('shortDescription', formData.shortDescription);
-    if (formData.category) data.append('category', formData.category);
+    data.append('category', formData.category);
     if (formData.coverImage) data.append('coverImage', formData.coverImage);
-    if (formData.images) {
-      formData.images.forEach(img => data.append('images', img));
-    }
-    if (formData.venue?.name) data.append('venue[name]', formData.venue.name);
-    if (formData.venue?.address) data.append('venue[address]', formData.venue.address);
-    if (formData.venue?.city) data.append('venue[city]', formData.venue.city);
-    if (formData.venue?.coordinates?.lat) data.append('venue[coordinates][lat]', formData.venue.coordinates.lat.toString());
-    if (formData.venue?.coordinates?.lng) data.append('venue[coordinates][lng]', formData.venue.coordinates.lng.toString());
-    if (formData.dateTime?.start) data.append('dateTime[start]', new Date(formData.dateTime.start).toISOString());
-    if (formData.dateTime?.end) data.append('dateTime[end]', new Date(formData.dateTime.end).toISOString());
-    if (formData.pricing?.ticketPrice) data.append('pricing[ticketPrice]', formData.pricing.ticketPrice.toString());
-    if (formData.pricing?.currency) data.append('pricing[currency]', formData.pricing.currency);
-    if (formData.pricing?.earlyBird?.price)
+    data.append('venue[name]', formData.venue.name);
+    data.append('venue[address]', formData.venue.address);
+    data.append('venue[city]', formData.venue.city);
+    if (formData.venue.coordinates?.lat) data.append('venue[coordinates][lat]', formData.venue.coordinates.lat.toString());
+    if (formData.venue.coordinates?.lng) data.append('venue[coordinates][lng]', formData.venue.coordinates.lng.toString());
+    data.append('dateTime[start]', new Date(formData.dateTime.start).toISOString());
+    data.append('dateTime[end]', new Date(formData.dateTime.end).toISOString());
+    data.append('pricing[ticketPrice]', formData.pricing.ticketPrice.toString());
+    if (formData.pricing.currency) data.append('pricing[currency]', formData.pricing.currency);
+    if (formData.pricing.earlyBird?.price)
       data.append('pricing[earlyBird][price]', formData.pricing.earlyBird.price.toString());
-    if (formData.pricing?.earlyBird?.deadline)
+    if (formData.pricing.earlyBird?.deadline)
       data.append('pricing[earlyBird][deadline]', new Date(formData.pricing.earlyBird.deadline).toISOString());
-    if (formData.capacity?.totalSeats) data.append('capacity[totalSeats]', formData.capacity.totalSeats.toString());
+    data.append('capacity[totalSeats]', formData.capacity.totalSeats.toString());
+    data.append('capacity[availableSeats]', formData.capacity.availableSeats.toString());
+    data.append('capacity[soldSeats]', formData.capacity.soldSeats.toString());
     if (formData.status) data.append('status', formData.status);
     if (formData.tags) data.append('tags', formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag).join(','));
     if (formData.features)
@@ -175,17 +218,15 @@ const UpdateEvent: React.FC = () => {
     if (formData.socialLinks?.facebook) data.append('socialLinks[facebook]', formData.socialLinks.facebook);
     if (formData.socialLinks?.twitter) data.append('socialLinks[twitter]', formData.socialLinks.twitter);
     if (formData.socialLinks?.instagram) data.append('socialLinks[instagram]', formData.socialLinks.instagram);
-    if (formData.isPopular !== undefined) data.append('isPopular', formData.isPopular.toString());
-    if (formData.isFeatured !== undefined) data.append('isFeatured', formData.isFeatured.toString());
 
     try {
-      console.log('Updating event with:', Object.fromEntries(data));
-      setSuccess(`Event updated successfully`);
+      await eventService.updateEvent(id!, data);
+      setSuccess('Event updated successfully');
       setError('');
       navigate('/events');
-    } catch (err) {
+    } catch (err: unknown) {
       setSuccess('');
-      console.error('Update event error:', err);
+      setError('Failed to update event');
     }
   };
 
@@ -193,12 +234,12 @@ const UpdateEvent: React.FC = () => {
     return <div className="text-center p-6 text-gray-600">Loading event...</div>;
   }
 
-  if (error && !formData.title) {
+  if (error && categories.length === 0) {
     return <div className="text-center p-6 text-red-500 bg-red-100 rounded">{error}</div>;
   }
 
   return (
-    <div className="container mx-auto p-6 bg-gray-100 min-h-screen">
+    <div className="container-fluid mx-auto p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Update Event</h1>
       {error && <p className="text-red-500 bg-red-100 p-3 rounded mb-6">{error}</p>}
       {success && <p className="text-green-500 bg-green-100 p-3 rounded mb-6">{success}</p>}
@@ -211,8 +252,9 @@ const UpdateEvent: React.FC = () => {
             <input
               type="text"
               id="title"
-              value={formData.title || ''}
+              value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              required
               className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -220,8 +262,9 @@ const UpdateEvent: React.FC = () => {
             <label htmlFor="description" className="block mb-1 font-medium text-gray-600">Description</label>
             <textarea
               id="description"
-              value={formData.description || ''}
+              value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              required
               rows={5}
               className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -230,7 +273,7 @@ const UpdateEvent: React.FC = () => {
             <label htmlFor="shortDescription" className="block mb-1 font-medium text-gray-600">Short Description (max 200 chars)</label>
             <textarea
               id="shortDescription"
-              value={formData.shortDescription || ''}
+              value={formData.shortDescription}
               onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
               rows={3}
               className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -240,8 +283,9 @@ const UpdateEvent: React.FC = () => {
             <label htmlFor="category" className="block mb-1 font-medium text-gray-600">Category</label>
             <select
               id="category"
-              value={formData.category || ''}
+              value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              required
               className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select Category</option>
@@ -260,22 +304,12 @@ const UpdateEvent: React.FC = () => {
           <div>
             <label htmlFor="coverImage" className="block mb-1 font-medium text-gray-600">Cover Image (Max 5MB)</label>
             <input
-              type="file"
+              type="text"
               id="coverImage"
-              accept="image/*"
-              onChange={(e) => setFormData({ ...formData, coverImage: e.target.files ? e.target.files[0] : undefined })}
-              className="border border-gray-300 p-2 w-full rounded file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200"
-            />
-          </div>
-          <div>
-            <label htmlFor="images" className="block mb-1 font-medium text-gray-600">Additional Images (Max 5, each 5MB)</label>
-            <input
-              type="file"
-              id="images"
-              accept="image/*"
-              multiple
-              onChange={(e) => setFormData({ ...formData, images: e.target.files ? Array.from(e.target.files) : undefined })}
-              className="border border-gray-300 p-2 w-full rounded file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200"
+              value={formData.coverImage}
+              onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
+              required
+              className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>
@@ -288,8 +322,9 @@ const UpdateEvent: React.FC = () => {
             <input
               type="text"
               id="venueName"
-              value={formData.venue?.name || ''}
+              value={formData.venue.name}
               onChange={(e) => setFormData({ ...formData, venue: { ...formData.venue, name: e.target.value } })}
+              required
               className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -298,8 +333,9 @@ const UpdateEvent: React.FC = () => {
             <input
               type="text"
               id="venueAddress"
-              value={formData.venue?.address || ''}
+              value={formData.venue.address}
               onChange={(e) => setFormData({ ...formData, venue: { ...formData.venue, address: e.target.value } })}
+              required
               className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -308,8 +344,9 @@ const UpdateEvent: React.FC = () => {
             <input
               type="text"
               id="venueCity"
-              value={formData.venue?.city || ''}
+              value={formData.venue.city}
               onChange={(e) => setFormData({ ...formData, venue: { ...formData.venue, city: e.target.value } })}
+              required
               className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -317,7 +354,7 @@ const UpdateEvent: React.FC = () => {
             <label className="block mb-1 font-medium text-gray-600">Select Location on Map</label>
             <div className="h-64 w-full rounded border border-gray-300">
               <MapContainer
-                center={formData.venue?.coordinates?.lat && formData.venue?.coordinates?.lng ? [formData.venue.coordinates.lat, formData.venue.coordinates.lng] : [30.0444, 31.2357]}
+                center={formData.venue.coordinates?.lat && formData.venue.coordinates?.lng ? [formData.venue.coordinates.lat, formData.venue.coordinates.lng] : [30.0444, 31.2357]}
                 zoom={10}
                 style={{ height: '100%', width: '100%' }}
               >
@@ -325,7 +362,7 @@ const UpdateEvent: React.FC = () => {
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
-                {formData.venue?.coordinates?.lat && formData.venue?.coordinates?.lng && (
+                {formData.venue.coordinates?.lat && formData.venue.coordinates?.lng && (
                   <Marker position={[formData.venue.coordinates.lat, formData.venue.coordinates.lng]} />
                 )}
                 <MapClickHandler onLocationSelect={handleLocationSelect} />
@@ -337,13 +374,13 @@ const UpdateEvent: React.FC = () => {
                 <input
                   type="number"
                   id="venueLat"
-                  value={formData.venue?.coordinates?.lat ?? ''}
+                  value={formData.venue.coordinates?.lat ?? ''}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
                       venue: {
                         ...formData.venue,
-                        coordinates: { ...formData.venue?.coordinates, lat: e.target.value ? parseFloat(e.target.value) : undefined },
+                        coordinates: { ...formData.venue.coordinates, lat: e.target.value ? parseFloat(e.target.value) : undefined },
                       },
                     })
                   }
@@ -355,13 +392,13 @@ const UpdateEvent: React.FC = () => {
                 <input
                   type="number"
                   id="venueLng"
-                  value={formData.venue?.coordinates?.lng ?? ''}
+                  value={formData.venue.coordinates?.lng ?? ''}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
                       venue: {
                         ...formData.venue,
-                        coordinates: { ...formData.venue?.coordinates, lng: e.target.value ? parseFloat(e.target.value) : undefined },
+                        coordinates: { ...formData.venue.coordinates, lng: e.target.value ? parseFloat(e.target.value) : undefined },
                       },
                     })
                   }
@@ -381,8 +418,9 @@ const UpdateEvent: React.FC = () => {
               <input
                 type="datetime-local"
                 id="startDate"
-                value={formData.dateTime?.start?.toString() || ''}
+                value={formData.dateTime.start}
                 onChange={(e) => setFormData({ ...formData, dateTime: { ...formData.dateTime, start: e.target.value } })}
+                required
                 className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -391,8 +429,9 @@ const UpdateEvent: React.FC = () => {
               <input
                 type="datetime-local"
                 id="endDate"
-                value={formData.dateTime?.end?.toString() || ''}
+                value={formData.dateTime.end}
                 onChange={(e) => setFormData({ ...formData, dateTime: { ...formData.dateTime, end: e.target.value } })}
+                required
                 className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -407,13 +446,14 @@ const UpdateEvent: React.FC = () => {
             <input
               type="number"
               id="ticketPrice"
-              value={formData.pricing?.ticketPrice ?? ''}
+              value={formData.pricing.ticketPrice}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  pricing: { ...formData.pricing, ticketPrice: e.target.value ? parseFloat(e.target.value) : undefined },
+                  pricing: { ...formData.pricing, ticketPrice: parseFloat(e.target.value) || 0 },
                 })
               }
+              required
               min="0"
               className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -422,7 +462,7 @@ const UpdateEvent: React.FC = () => {
             <label htmlFor="currency" className="block mb-1 font-medium text-gray-600">Currency</label>
             <select
               id="currency"
-              value={formData.pricing?.currency || 'EGP'}
+              value={formData.pricing.currency}
               onChange={(e) =>
                 setFormData({
                   ...formData,
@@ -442,13 +482,13 @@ const UpdateEvent: React.FC = () => {
               <input
                 type="number"
                 id="earlyBirdPrice"
-                value={formData.pricing?.earlyBird?.price ?? ''}
+                value={formData.pricing.earlyBird?.price ?? ''}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
                     pricing: {
                       ...formData.pricing,
-                      earlyBird: { ...formData.pricing?.earlyBird, price: e.target.value ? parseFloat(e.target.value) : undefined },
+                      earlyBird: { ...formData.pricing.earlyBird, price: e.target.value ? parseFloat(e.target.value) : undefined },
                     },
                   })
                 }
@@ -461,13 +501,13 @@ const UpdateEvent: React.FC = () => {
               <input
                 type="datetime-local"
                 id="earlyBirdDeadline"
-                value={formData.pricing?.earlyBird?.deadline?.toString() || ''}
+                value={formData.pricing.earlyBird?.deadline ?? ''}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
                     pricing: {
                       ...formData.pricing,
-                      earlyBird: { ...formData.pricing?.earlyBird, deadline: e.target.value || undefined },
+                      earlyBird: { ...formData.pricing.earlyBird, deadline: e.target.value || undefined },
                     },
                   })
                 }
@@ -485,14 +525,49 @@ const UpdateEvent: React.FC = () => {
             <input
               type="number"
               id="totalSeats"
-              value={formData.capacity?.totalSeats ?? ''}
+              value={formData.capacity.totalSeats}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  capacity: { ...formData.capacity, totalSeats: e.target.value ? parseInt(e.target.value) : undefined },
+                  capacity: { ...formData.capacity, totalSeats: parseInt(e.target.value) || 0 },
                 })
               }
+              required
               min="1"
+              className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label htmlFor="availableSeats" className="block mb-1 font-medium text-gray-600">Available Seats</label>
+            <input
+              type="number"
+              id="availableSeats"
+              value={formData.capacity.availableSeats}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  capacity: { ...formData.capacity, availableSeats: parseInt(e.target.value) || 0 },
+                })
+              }
+              required
+              min="0"
+              className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label htmlFor="soldSeats" className="block mb-1 font-medium text-gray-600">Sold Seats</label>
+            <input
+              type="number"
+              id="soldSeats"
+              value={formData.capacity.soldSeats}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  capacity: { ...formData.capacity, soldSeats: parseInt(e.target.value) || 0 },
+                })
+              }
+              required
+              min="0"
               className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -505,7 +580,7 @@ const UpdateEvent: React.FC = () => {
             <label htmlFor="status" className="block mb-1 font-medium text-gray-600">Status</label>
             <select
               id="status"
-              value={formData.status || 'draft'}
+              value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value as 'draft' | 'published' | 'cancelled' | 'completed' })}
               className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
@@ -520,7 +595,7 @@ const UpdateEvent: React.FC = () => {
             <input
               type="text"
               id="tags"
-              value={formData.tags || ''}
+              value={formData.tags}
               onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
               placeholder="e.g., music, festival, concert"
               className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -531,7 +606,7 @@ const UpdateEvent: React.FC = () => {
             <input
               type="text"
               id="features"
-              value={formData.features || ''}
+              value={formData.features}
               onChange={(e) => setFormData({ ...formData, features: e.target.value })}
               placeholder="e.g., food, parking, VIP"
               className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -571,28 +646,6 @@ const UpdateEvent: React.FC = () => {
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="isPopular" className="block mb-1 font-medium text-gray-600">Popular</label>
-              <input
-                type="checkbox"
-                id="isPopular"
-                checked={formData.isPopular || false}
-                onChange={(e) => setFormData({ ...formData, isPopular: e.target.checked })}
-                className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="isFeatured" className="block mb-1 font-medium text-gray-600">Featured</label>
-              <input
-                type="checkbox"
-                id="isFeatured"
-                checked={formData.isFeatured || false}
-                onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-                className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-            </div>
-          </div>
         </div>
 
         {/* Social Links */}
@@ -603,7 +656,7 @@ const UpdateEvent: React.FC = () => {
             <input
               type="url"
               id="website"
-              value={formData.socialLinks?.website || ''}
+              value={formData.socialLinks?.website ?? ''}
               onChange={(e) =>
                 setFormData({
                   ...formData,
@@ -619,7 +672,7 @@ const UpdateEvent: React.FC = () => {
             <input
               type="url"
               id="facebook"
-              value={formData.socialLinks?.facebook || ''}
+              value={formData.socialLinks?.facebook ?? ''}
               onChange={(e) =>
                 setFormData({
                   ...formData,
@@ -635,7 +688,7 @@ const UpdateEvent: React.FC = () => {
             <input
               type="url"
               id="twitter"
-              value={formData.socialLinks?.twitter || ''}
+              value={formData.socialLinks?.twitter ?? ''}
               onChange={(e) =>
                 setFormData({
                   ...formData,
@@ -651,7 +704,7 @@ const UpdateEvent: React.FC = () => {
             <input
               type="url"
               id="instagram"
-              value={formData.socialLinks?.instagram || ''}
+              value={formData.socialLinks?.instagram ?? ''}
               onChange={(e) =>
                 setFormData({
                   ...formData,
