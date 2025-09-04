@@ -8,8 +8,6 @@ import { Toaster } from "react-hot-toast";
 import CategoryManagement from "./features/categories/components/CategoryManagement";
 import CreateUser from "./features/users/components/CreateUser";
 import UpdateUser from "./features/users/components/UpdateUser";
-import CreateCategoryPage from "./features/categories/components/CreateCategory";
-import UpdateCategoryPage from "./features/categories/components/UpdateCategory";
 import Dashboard from "./features/dashboard/components/Dashboard.page";
 import EventManagement from "./features/events/components/EventManagement";
 import UsersList from "./features/users/components/UsersList";
@@ -20,6 +18,8 @@ import UpdateEvent from "./features/events/components/UpdateEventPage";
 import BookTicket from "./features/tickets/components/BookTicket";
 import MyTickets from "./features/tickets/components/MyTickets";
 import AllTickets from "./features/tickets/components/AllTickets";
+import CreateCategoryPage from "./features/categories/components/CreateCategory";
+import UpdateCategoryPage from "./features/categories/components/UpdateCategory";
 
 function App() {
   return (
