@@ -6,7 +6,6 @@ import { PasswordResetFlow } from "./features/auth/components/ForgotPassword";
 import { Toaster } from "react-hot-toast";
 import CategoryManagement from "./features/categories/components/CategoryManagement";
 import CreateUser from "./features/users/components/CreateUser";
-import CreateCategory from "./features/categories/components/CreateCategory";
 import UpdateUser from "./features/users/components/UpdateUser";
 import EventManagement from "./features/events/components/EventManagement";
 import UsersList from "./features/users/components/UsersList";
@@ -20,6 +19,7 @@ import AllTickets from "./features/tickets/components/AllTickets";
 import UpdateCategory from "./features/categories/components/UpdateCategory";
 import DashboardLayout from "./features/dashboard/components/DashboardLayout";
 import Dashboard from "./features/dashboard/components/Dashboard";
+import CreateCategory from "./features/categories/components/CreateCategory";
 
 function App() {
   return (
