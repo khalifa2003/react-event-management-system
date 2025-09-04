@@ -3,7 +3,7 @@ import type { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
 
 const api: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL || "http://localhost:8000/api/v1",
+  baseURL: import.meta.env.Base_URL || "http://localhost:8000/api/v1",
   headers: {"Content-Type": "application/json"},
 });
 
