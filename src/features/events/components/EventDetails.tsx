@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit3, MapPin, Clock, Calendar, DollarSign, Users, TrendingUp, Star, User, X } from 'lucide-react';
+import { ArrowLeft, Edit3, MapPin, Clock, Calendar, DollarSign, Users, TrendingUp, Star, User } from 'lucide-react';
 import { eventService } from '../services/eventService';
 import type { EventResponse } from '../interfaces/events';
 import { getUser } from '../../auth/services/auth.service';

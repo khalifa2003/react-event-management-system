@@ -35,7 +35,13 @@ const CreateEvent: React.FC = () => {
   });
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
+  const formatDateTimeLocal = (value: string | Date | undefined): string => {
+    if (!value) return "";
+    if (value instanceof Date) {
+      return value.toISOString().slice(0, 16); // YYYY-MM-DDTHH:mm
+    }
+    return value; // string
+  };
   // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
@@ -213,7 +219,7 @@ const CreateEvent: React.FC = () => {
             >
               <option value="">Select Category</option>
               {categories.map(cat => (
-                <option key={cat._id.toString()} value={cat._id.toString()}>
+                <option key={cat._id} value={cat._id}>
                   {cat.name}
                 </option>
               ))}
@@ -340,7 +346,7 @@ const CreateEvent: React.FC = () => {
               <input
                 type="datetime-local"
                 id="startDate"
-                value={formData.dateTime.start.toString()}
+                value={formatDateTimeLocal(formData.dateTime.start)}
                 onChange={(e) => setFormData({ ...formData, dateTime: { ...formData.dateTime, start: e.target.value } })}
                 required
                 className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -351,7 +357,7 @@ const CreateEvent: React.FC = () => {
               <input
                 type="datetime-local"
                 id="endDate"
-                value={formData.dateTime.end.toString()}
+                value={formatDateTimeLocal(formData.dateTime.end)}
                 onChange={(e) => setFormData({ ...formData, dateTime: { ...formData.dateTime, end: e.target.value } })}
                 required
                 className="border border-gray-300 p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -423,7 +429,7 @@ const CreateEvent: React.FC = () => {
               <input
                 type="datetime-local"
                 id="earlyBirdDeadline"
-                value={formData.pricing.earlyBird?.deadline?.toString() ?? ''}
+                value={formatDateTimeLocal(formData.pricing.earlyBird?.deadline) ?? ''}
                 onChange={(e) =>
                   setFormData({
                     ...formData,

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { AlertCircle, Lock, Eye, EyeOff } from "lucide-react";
 import { resetPassword } from "../services/auth.service";
-import type { IResetPassword } from "../interfaces/i-reset-password.model";
 
 interface ResetPasswordFormProps {
   email: string;

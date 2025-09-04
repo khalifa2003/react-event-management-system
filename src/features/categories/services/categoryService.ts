@@ -27,7 +27,7 @@ class CategoryService {
     return response.data;
   }
   async createCategory(categoryData: CreateCategoryRequest): Promise<CategoryResponse> {
-    if (categoryData.image instanceof File) {
+    if (categoryData.image) {
       const formData = new FormData();
       formData.append('name', categoryData.name);
       if (categoryData.description) formData.append('description', categoryData.description);
