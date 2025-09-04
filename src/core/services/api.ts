@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 
 const api: AxiosInstance = axios.create({
   baseURL: "https://programming-area-server.vercel.app/api/v1",
+  // baseURL: "http://localhost:8000/api/v1",
 });
 
 api.interceptors.request.use(
