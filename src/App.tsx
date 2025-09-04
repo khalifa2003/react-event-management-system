@@ -19,7 +19,7 @@ import AllTickets from "./features/tickets/components/AllTickets";
 import UpdateCategory from "./features/categories/components/UpdateCategory";
 import DashboardLayout from "./features/dashboard/components/DashboardLayout";
 import Dashboard from "./features/dashboard/components/Dashboard";
-import CreateCategory from "./features/categories/components/CreateCategory";
+import CreateCategory from "./features/categories/components/CreateCategory2";
 
 function App() {
   return (
