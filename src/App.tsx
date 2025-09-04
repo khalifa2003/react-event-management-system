@@ -1,25 +1,25 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Login from "./features/auth/components/Login";
-import Register from "./features/auth/components/Register";
-import ProtectedRoute from "./features/auth/ProtectedRoute";
-import { PasswordResetFlow } from "./features/auth/components/ForgotPassword";
+import Login from "./features/auth/components/Login.tsx";
+import Register from "./features/auth/components/Register.tsx";
+import ProtectedRoute from "./features/auth/ProtectedRoute.tsx";
+import { PasswordResetFlow } from "./features/auth/components/ForgotPassword.tsx";
 import { Toaster } from "react-hot-toast";
-import CategoryManagement from "./features/categories/components/CategoryManagement";
-import CreateUser from "./features/users/components/CreateUser";
-import UpdateUser from "./features/users/components/UpdateUser";
-import EventManagement from "./features/events/components/EventManagement";
-import UsersList from "./features/users/components/UsersList";
-import UserProfile from "./features/users/components/UserProfile";
-import CreateEvent from "./features/events/components/CreateEvent";
-import EventDetails from "./features/events/components/EventDetails";
-import UpdateEvent from "./features/events/components/UpdateEvent";
-import BookTicket from "./features/tickets/components/BookTicket";
-import MyTickets from "./features/tickets/components/MyTickets";
-import AllTickets from "./features/tickets/components/AllTickets";
-import UpdateCategory from "./features/categories/components/UpdateCategory";
-import DashboardLayout from "./features/dashboard/components/DashboardLayout";
-import CreateCategory from "./features/categories/components/CreateCategory";
-import Dashboard from "./features/dashboard/components/Dashboard";
+import CategoryManagement from "./features/categories/components/CategoryManagement.tsx";
+import CreateUser from "./features/users/components/CreateUser.tsx";
+import CreateCategory from "./features/categories/components/CreateCategory.tsx";
+import UpdateUser from "./features/users/components/UpdateUser.tsx";
+import EventManagement from "./features/events/components/EventManagement.tsx";
+import UsersList from "./features/users/components/UsersList.tsx";
+import UserProfile from "./features/users/components/UserProfile.tsx";
+import CreateEvent from "./features/events/components/CreateEvent.tsx";
+import EventDetails from "./features/events/components/EventDetails.tsx";
+import UpdateEvent from "./features/events/components/UpdateEvent.tsx";
+import BookTicket from "./features/tickets/components/BookTicket.tsx";
+import MyTickets from "./features/tickets/components/MyTickets.tsx";
+import AllTickets from "./features/tickets/components/AllTickets.tsx";
+import UpdateCategory from "./features/categories/components/UpdateCategory.tsx";
+import DashboardLayout from "./features/dashboard/components/DashboardLayout.tsx";
+import Dashboard from "./features/dashboard/components/Dashboard.tsx";
 
 function App() {
   return (
