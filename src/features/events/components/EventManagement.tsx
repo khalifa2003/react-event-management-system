@@ -7,6 +7,7 @@ import { eventService } from '../services/eventService';
 import type { Category, EventListResponse } from '../interfaces/events';
 import { categoryService } from '../../categories/services/categoryService';
 import type { CategoriesResponse } from '../../categories/interfaces/Category';
+import { getUser } from '../../auth/services/auth.service';
 
 interface Event {
   id: string;
@@ -68,9 +69,10 @@ const EventManagement: React.FC = () => {
     total: 0,
     pages: 1,
   });
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null); // For delete dialog
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const navigate = useNavigate();
-  const userRole = 'admin'; // Replace with actual role from auth context
+  const user = getUser();
+  const userRole = user?.role || "user"; 
 
   // Fetch categories
   useEffect(() => {
@@ -214,18 +216,31 @@ const EventManagement: React.FC = () => {
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white p-4 rounded-lg shadow-lg">
                 <h3 className="text-lg font-semibold mb-2">Event Actions</h3>
-                <button
-                  onClick={() => { navigate(`/events/${event.id}/edit`); setIsOpen(false); }}
-                  className="w-full mb-2 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                >
-                  Update
-                </button>
-                <button
-                  onClick={() => { setSelectedEvent(event); setIsOpen(false); }}
-                  className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                >
-                  Delete
-                </button>
+                {userRole === "user" && (
+                  <button
+                    onClick={() => { navigate("/tickets/book/"+event.id); setIsOpen(false); }}
+                    className="w-full mb-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                  >
+                    Book Ticket
+                  </button>
+                )}
+                {(userRole === "admin" || userRole === "manager") && (
+                  <>
+                    <button
+                      onClick={() => { navigate(`/events/${event.id}/edit`); setIsOpen(false); }}
+                      className="w-full mb-2 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                    >
+                      Update
+                    </button>
+                    <button
+                      onClick={() => { setSelectedEvent(event); setIsOpen(false); }}
+                      className="w-full px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </>
+                )}
+
                 <button
                   onClick={() => setIsOpen(false)}
                   className="w-full mt-2 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
@@ -398,12 +413,14 @@ const EventManagement: React.FC = () => {
 
         {/* Controls */}
         <div className="flex items-center justify-between mb-6">
+          {userRole === 'admin' && 
           <button
             onClick={() => navigate('/events/create')}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <Plus className="w-4 h-4" /> New Event
           </button>
+          }
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600">Sort By:</span>

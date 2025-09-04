@@ -3,8 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit3, MapPin, Clock, Calendar, DollarSign, Users, TrendingUp, Star, User, X } from 'lucide-react';
 import { eventService } from '../services/eventService';
 import type { EventResponse } from '../interfaces/events';
+import { getUser } from '../../auth/services/auth.service';
 
 const EventDetailsPage: React.FC = () => {
+  const user = getUser();
+  const userRole = user?.role || "user";
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [event, setEvent] = useState<EventResponse | null>(null);
@@ -280,16 +283,17 @@ const EventDetailsPage: React.FC = () => {
                   <p className="text-sm text-gray-600">Scan QR code for easy payments</p>
                 </div>
               </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-4 pt-4">
-                <button onClick={() => navigate(`/events/${id}/edit`)} className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-lg transition-colors">
-                  EDIT
+            {/* Action Buttons */}
+            <div className="flex gap-4 pt-4">
+              {userRole === "user" && (
+                <button
+                  onClick={() => navigate("/tickets/book/"+event.data._id)}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+                >
+                  Book Ticket
                 </button>
-                <button className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-lg transition-colors">
-                  Attendee Insights
-                </button>
-              </div>
+              )}
+            </div>
             </div>
           </div>
         </div>

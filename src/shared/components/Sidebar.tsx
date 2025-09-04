@@ -98,22 +98,24 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false, onToggle }) => {
             )}
           </div>
         </div>
-        <div className="p-2 pb-6 border-b border-white mx-2">
-          <button
-            onClick={() => navigate('/dashboard/events/new')}
-            className="w-full flex items-center gap-3 bg-[#1E1E1E] hover:bg-gray-800 transition-all duration-200 rounded-xl shadow-lg p-3"
-          >
-            <div className="w-10 h-10 flex items-center justify-center bg-[#C1FF72] rounded-xl text-white">
-              <Plus size={30} />
+          {user?.role === "admin" && 
+            <div className="p-2 pb-6 border-b border-white mx-2">
+              <button
+                onClick={() => navigate('/events/create')}
+                className="w-full flex items-center gap-3 bg-[#1E1E1E] hover:bg-gray-800 transition-all duration-200 rounded-xl shadow-lg p-3"
+              >
+                <div className="w-10 h-10 flex items-center justify-center bg-[#C1FF72] rounded-xl text-white">
+                  <Plus size={30} />
+                </div>
+                {!collapsed && (
+                  <div className="flex flex-col items-start">
+                    <span className="font-medium text-white">Add Quick Event</span>
+                    <span className="text-xs text-gray-400">Events</span>
+                  </div>
+                )}
+              </button>
             </div>
-            {!collapsed && (
-              <div className="flex flex-col items-start">
-                <span className="font-medium text-white">Add Quick Event</span>
-                <span className="text-xs text-gray-400">Events</span>
-              </div>
-            )}
-          </button>
-        </div>
+          }
         <div className={`${collapsed ? "hidden" : "w-64"} bg-[#000]`}>
           {/* Logo ... */}
           <nav className="flex-1 py-4">
