@@ -79,7 +79,7 @@ const mapFormDataToCreateCategoryRequest = (
   };
 };
 
-const CreateCategoryPage = () => {
+const CreateCategory = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<CategoryFormData>({
     name: '',
@@ -209,4 +209,4 @@ const CreateCategoryPage = () => {
   );
 };
 
-export default CreateCategoryPage;
+export default CreateCategory;

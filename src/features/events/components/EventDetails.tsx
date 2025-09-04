@@ -5,7 +5,7 @@ import { eventService } from '../services/eventService';
 import type { EventResponse } from '../interfaces/events';
 import { getUser } from '../../auth/services/auth.service';
 
-const EventDetailsPage: React.FC = () => {
+const EventDetails: React.FC = () => {
   const user = getUser();
   const userRole = user?.role || "user";
   const { id } = useParams<{ id: string }>();
@@ -302,4 +302,4 @@ const EventDetailsPage: React.FC = () => {
   );
 };
 
-export default EventDetailsPage;
+export default EventDetails;

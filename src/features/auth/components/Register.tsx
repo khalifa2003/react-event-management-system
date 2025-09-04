@@ -4,7 +4,7 @@ import { registerUser } from "../services/auth.service";
 import type { IRegister } from "../interfaces/i-register.model";
 import { useNavigate } from "react-router-dom";
 
-const RegisterPage: React.FC = () => {
+const Register: React.FC = () => {
 const navigate = useNavigate();
   const [formData, setFormData] = useState<IRegister>({
     name: "",
@@ -124,4 +124,4 @@ const navigate = useNavigate();
   );
 };
 
-export default RegisterPage;
+export default Register;

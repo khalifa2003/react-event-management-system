@@ -4,7 +4,7 @@ import { loginUser } from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
 
 
-const LoginPage: React.FC = () => {
+const Login: React.FC = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -69,4 +69,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
+export default Login;

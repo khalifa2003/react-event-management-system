@@ -85,7 +85,7 @@ const mapFormDataToUpdateCategoryRequest = (
   };
 };
 
-const UpdateCategoryPage = () => {
+const UpdateCategory = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<CategoryFormData>({
@@ -322,4 +322,4 @@ const UpdateCategoryPage = () => {
   );
 };
 
-export default UpdateCategoryPage;
+export default UpdateCategory;
