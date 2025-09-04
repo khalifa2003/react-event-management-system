@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "./features/auth/components/Login.page";
-import RegisterPage from "./features/auth/components/Register.page";
+import LoginPage from "./features/auth/components/Login";
+import RegisterPage from "./features/auth/components/Register";
 import ProtectedRoute from "./features/auth/ProtectedRoute";
-import { PasswordResetFlow } from "./features/auth/components/ForgotPassword.page";
+import { PasswordResetFlow } from "./features/auth/components/ForgotPassword";
 import { Toaster } from "react-hot-toast";
 import CategoryManagement from "./features/categories/components/CategoryManagement";
 import CreateUser from "./features/users/components/CreateUser";
@@ -17,7 +17,7 @@ import BookTicket from "./features/tickets/components/BookTicket";
 import MyTickets from "./features/tickets/components/MyTickets";
 import AllTickets from "./features/tickets/components/AllTickets";
 import UpdateCategoryPage from "./features/categories/components/UpdateCategory";
-import Dashboard from "./features/dashboard/components/Dashboard.page";
+import Dashboard from "./features/dashboard/components/DashboardPage";
 import DashboardLayout from "./features/dashboard/components/DashboardLayout";
 import CreateCategoryPage from "./features/categories/components/CreateCategory";
 
