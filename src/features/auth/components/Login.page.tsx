@@ -26,7 +26,7 @@ const LoginPage: React.FC = () => {
     try {
       const data = await loginUser(formData);
       localStorage.setItem("token", data.token);
-      navigate("/dashboard");
+      navigate("/events");
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError("Login failed");

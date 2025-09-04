@@ -23,7 +23,7 @@ const DashboardLayout: React.FC = () => {
   const closeMobileMenu = () => { setMobileMenuOpen(false) };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex min-h-screen bg-black">
       <div className={`${isMobile ? (mobileMenuOpen ? 'block' : 'hidden') : 'block'}`}>
         <Sidebar collapsed={isMobile ? false : sidebarCollapsed} onToggle={closeMobileMenu}/>
       </div>

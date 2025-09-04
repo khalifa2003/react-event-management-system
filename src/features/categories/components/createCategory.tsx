@@ -5,7 +5,6 @@ import { categoryService } from '../services/categoryService';
 import type { CategoryFormData } from '../interfaces/Category';
 import type { CreateCategoryRequest } from '../interfaces/Category';
 import { useNavigate } from 'react-router-dom';
-
 const InputField = ({
   label,
   field,
@@ -74,7 +73,7 @@ const mapFormDataToCreateCategoryRequest = (
   return {
     name: formData.name,
     description: formData.description || undefined,
-    image: formData.image || undefined,   // ✅ URL string
+    image: formData.image, 
     color: formData.color || undefined,
     isActive: formData.isActive,
   };
@@ -128,7 +127,7 @@ const CreateCategoryPage = () => {
     setErrors(validationErrors);
 
     if (!isFormValid) {
-      toast.error('Please fix the errors in the form');
+      toast.error('Please fix the errors in the form', { position: "bottom-right" });
       return;
     }
 
@@ -137,18 +136,25 @@ const CreateCategoryPage = () => {
     try {
       const categoryData = mapFormDataToCreateCategoryRequest(formData);
       await categoryService.createCategory(categoryData);
-      toast.success('Category created successfully!');
-      navigate('/categories');
+
+      toast.success('Category created successfully!', {
+        position: "top-right",
+        duration: 2000,
+      });
+      navigate('/categories')
+
     } catch (error: any) {
       const message =
         error.response?.data?.message ||
         error.message ||
         'Failed to create category. Please try again.';
-      toast.error(message);
+
+      toast.error(message, { position: "bottom-right" });
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">

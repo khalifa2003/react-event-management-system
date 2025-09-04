@@ -4,8 +4,11 @@ import { Loader2, Edit, Trash2, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { categoryService } from '../services/categoryService';
 import type { Category } from '../interfaces/Category';
+import { getUser } from '../../auth/services/auth.service';
 
 const CategoryManagement = () => {
+  const user = getUser();
+  const isAdmin = user?.role === "admin";
   const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -14,14 +17,12 @@ const CategoryManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
-  // Fetch categories on mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await categoryService.getCategories();
         setCategories(response.data);
       } catch (error: any) {
-        console.error('Error fetching categories:', error);
         toast.error('Failed to load categories');
       } finally {
         setIsLoading(false);
@@ -30,7 +31,6 @@ const CategoryManagement = () => {
     fetchCategories();
   }, []);
 
-  // Handle delete category
   const handleDelete = useCallback(async (id: string) => {
     if (window.confirm('Are you sure you want to delete this category?')) {
       try {
@@ -38,17 +38,13 @@ const CategoryManagement = () => {
         setCategories(categories.filter((category) => category._id !== id));
         toast.success('Category deleted successfully');
       } catch (error: any) {
-        console.error('Error deleting category:', error);
         toast.error('Failed to delete category');
       }
     }
   }, [categories]);
 
-  // Filter and search categories
   const filteredCategories = useMemo(() => {
     let result = categories;
-
-    // Apply search
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
       result = result.filter(
@@ -57,8 +53,6 @@ const CategoryManagement = () => {
           (category.description && category.description.toLowerCase().includes(query))
       );
     }
-
-    // Apply status filter
     if (filterStatus === 'active') {
       result = result.filter((category) => category.isActive);
     } else if (filterStatus === 'inactive') {
@@ -68,7 +62,6 @@ const CategoryManagement = () => {
     return result;
   }, [categories, searchQuery, filterStatus]);
 
-  // Pagination logic
   const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
   const paginatedCategories = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
@@ -76,7 +69,6 @@ const CategoryManagement = () => {
     return filteredCategories.slice(start, end);
   }, [filteredCategories, currentPage, itemsPerPage]);
 
-  // Handle page change
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
@@ -102,7 +94,7 @@ const CategoryManagement = () => {
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
-                    setCurrentPage(1); // Reset to first page on search
+                    setCurrentPage(1); 
                   }}
                   className="w-full px-3 py-2 pl-10 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent border-gray-300"
                 />
@@ -121,12 +113,14 @@ const CategoryManagement = () => {
                   <option value="inactive">Inactive</option>
                 </select>
               </div>
-              <Link
-                to="/categories/create"
-                className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Create New Category
-              </Link>
+              {isAdmin && (
+                <Link
+                  to="/categories/create"
+                  className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Create New Category
+                </Link>
+              )}
             </div>
 
             {/* Categories Table */}
@@ -146,7 +140,7 @@ const CategoryManagement = () => {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Color</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Active</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      {isAdmin && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>}
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -178,7 +172,7 @@ const CategoryManagement = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4">{category.isActive ? 'Yes' : 'No'}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        {isAdmin && <td className="px-6 py-4 whitespace-nowrap">
                           <button
                             onClick={() => navigate(`/categories/${category._id}/edit`)}
                             className="text-blue-600 hover:text-blue-800 mr-4"
@@ -193,7 +187,7 @@ const CategoryManagement = () => {
                           >
                             <Trash2 className="h-5 w-5" />
                           </button>
-                        </td>
+                        </td>}
                       </tr>
                     ))}
                   </tbody>

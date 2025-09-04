@@ -7,8 +7,9 @@ import type { CreateEventData, Category } from '../interfaces/events';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import type { CategoriesResponse } from '../../categories/interfaces/Category';
+import toast from 'react-hot-toast';
 
-// Fix Leaflet marker icon issue
+
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -36,15 +37,13 @@ const UpdateEvent: React.FC = () => {
     socialLinks: { website: '', facebook: '', twitter: '', instagram: '' },
   });
   const [categories, setCategories] = useState<Category[]>([]);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch event and categories
   useEffect(() => {
     const fetchData = async () => {
       if (!id) {
-        setError('Event ID is required');
+        toast.error('Event ID is required');
         setIsLoading(false);
         return;
       }
@@ -54,16 +53,11 @@ const UpdateEvent: React.FC = () => {
         const categoriesResponse: CategoriesResponse = await categoryService.getCategories();
         setCategories(categoriesResponse.data);
 
-        // Safely handle category ID
-        const categoryId = typeof event.category === 'object' && event.category?._id
-          ? event.category._id
-          : event.category || '';
-
         setFormData({
           title: event.title || '',
           description: event.description || '',
           shortDescription: event.shortDescription || '',
-          category: categoryId,
+          category: event.category._id,
           coverImage: event.coverImage || '',
           venue: {
             name: event.venue?.name || '',
@@ -108,8 +102,8 @@ const UpdateEvent: React.FC = () => {
           },
         });
         setIsLoading(false);
-      } catch (err: unknown) {
-        setError('Failed to load event or categories');
+      } catch (err) {
+        toast.error('Failed to load event or categories');
         setIsLoading(false);
       }
     };
@@ -180,7 +174,7 @@ const UpdateEvent: React.FC = () => {
     e.preventDefault();
     const validationError = validateForm();
     if (validationError) {
-      setError(validationError);
+      toast.error(validationError);
       return;
     }
 
@@ -221,12 +215,10 @@ const UpdateEvent: React.FC = () => {
 
     try {
       await eventService.updateEvent(id!, data);
-      setSuccess('Event updated successfully');
-      setError('');
+      toast.success('Event updated successfully');
       navigate('/events');
-    } catch (err: unknown) {
-      setSuccess('');
-      setError('Failed to update event');
+    } catch (err) {
+      toast.error('Failed to update event');
     }
   };
 
@@ -234,15 +226,9 @@ const UpdateEvent: React.FC = () => {
     return <div className="text-center p-6 text-gray-600">Loading event...</div>;
   }
 
-  if (error && categories.length === 0) {
-    return <div className="text-center p-6 text-red-500 bg-red-100 rounded">{error}</div>;
-  }
-
   return (
     <div className="container-fluid mx-auto p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Update Event</h1>
-      {error && <p className="text-red-500 bg-red-100 p-3 rounded mb-6">{error}</p>}
-      {success && <p className="text-green-500 bg-green-100 p-3 rounded mb-6">{success}</p>}
       <form onSubmit={handleSubmit} className="bg-white shadow-lg rounded-lg p-6 space-y-6">
         {/* Basic Information */}
         <div className="space-y-4">

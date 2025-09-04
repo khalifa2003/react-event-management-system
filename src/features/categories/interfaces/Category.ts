@@ -32,7 +32,7 @@ export interface CategoryStatsResponse {
 export interface CreateCategoryRequest {
   name: string;
   description?: string;
-  image?: File;
+  image?: string;
   color?: string;
   isActive?: boolean;
 }

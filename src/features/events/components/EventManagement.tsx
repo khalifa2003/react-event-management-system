@@ -75,12 +75,8 @@ const EventManagement: React.FC = () => {
   // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
-      try {
-        const categoriesResponse: CategoriesResponse = await categoryService.getCategories();
-        setCategories(categoriesResponse.data);
-      } catch (err: unknown) {
-        console.error('Failed to fetch categories:', err);
-      }
+      const categoriesResponse: CategoriesResponse = await categoryService.getCategories();
+      setCategories(categoriesResponse.data);
     };
     fetchCategories();
   }, []);

@@ -6,6 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import type { CategoriesResponse } from '../../categories/interfaces/Category';
 import { eventService } from '../services/eventService';
+import toast from 'react-hot-toast';
 
 // Fix Leaflet marker icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -33,8 +34,6 @@ const CreateEvent: React.FC = () => {
     socialLinks: { website: '', facebook: '', twitter: '', instagram: '' },
   });
   const [categories, setCategories] = useState<Category[]>([]);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch categories
@@ -44,7 +43,7 @@ const CreateEvent: React.FC = () => {
         const categoriesResponse: CategoriesResponse = await categoryService.getCategories();
         setCategories(categoriesResponse.data);
         setIsLoading(false);
-      } catch (err: unknown) {
+      } catch (err) {
         setIsLoading(false);
       }
     };
@@ -114,7 +113,7 @@ const CreateEvent: React.FC = () => {
     e.preventDefault();
     const validationError = validateForm();
     if (validationError) {
-      setError(validationError);
+      toast.error(validationError);
       return;
     }
 
@@ -155,43 +154,18 @@ const CreateEvent: React.FC = () => {
 
     try {
       await eventService.createEvent(data);
-      setSuccess(`Event created successfully`);
-      setError('');
-      // setFormData({
-      //   title: '',
-      //   description: '',
-      //   shortDescription: '',
-      //   category: '',
-      //   coverImage: null,
-      //   venue: { name: '', address: '', city: '', coordinates: { lat: undefined, lng: undefined } },
-      //   dateTime: { start: '', end: '' },
-      //   pricing: { ticketPrice: 0, currency: 'EGP', earlyBird: { price: undefined, deadline: undefined } },
-      //   capacity: { totalSeats: 0 },
-      //   status: 'draft',
-      //   tags: '',
-      //   features: '',
-      //   ageRestriction: { minAge: undefined, maxAge: undefined },
-      //   socialLinks: { website: '', facebook: '', twitter: '', instagram: '' },
-      // });
-    } catch (err: unknown) {
-      setSuccess('');
-      console.error('Create event error:', err);
+      toast.success(`Event created successfully`);
+    } catch (err) {
+      toast.success('');
     }
   };
 
   if (isLoading) {
     return <div className="text-center p-6 text-gray-600">Loading categories...</div>;
   }
-
-  if (error && categories.length === 0) {
-    return <div className="text-center p-6 text-red-500 bg-red-100 rounded">{error}</div>;
-  }
-
   return (
     <div className="container-fluid mx-auto p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Create New Event</h1>
-      {error && <p className="text-red-500 bg-red-100 p-3 rounded mb-6">{error}</p>}
-      {success && <p className="text-green-500 bg-green-100 p-3 rounded mb-6">{success}</p>}
       <form onSubmit={handleSubmit} className="bg-white shadow-lg rounded-lg p-6 space-y-6">
         {/* Basic Information */}
         <div className="space-y-4">

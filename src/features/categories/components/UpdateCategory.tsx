@@ -119,7 +119,6 @@ const UpdateCategoryPage = () => {
           image: category.image || '',
         });
       } catch (error: any) {
-        console.error('Error fetching category:', error);
         toast.error('Failed to load category data');
         navigate('/categories');
       } finally {
@@ -177,16 +176,10 @@ const UpdateCategoryPage = () => {
 
     try {
       const categoryData = mapFormDataToUpdateCategoryRequest(formData, id);
-      console.log('Submitting update category data:', categoryData);
       await categoryService.updateCategory(categoryData);
       toast.success('Category updated successfully!');
       navigate('/categories');
     } catch (error: any) {
-      console.error('Error updating category:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
       const message =
         error.response?.data?.message ||
         error.message ||

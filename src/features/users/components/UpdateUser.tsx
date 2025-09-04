@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { userService } from '../services/userService';
 import type { User } from '../interfaces/userTypes';
+import toast from 'react-hot-toast';
 
 const UpdateUser: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -13,13 +14,11 @@ const UpdateUser: React.FC = () => {
   const [profileImg, setProfileImg] = useState<File | null>(null);
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   useEffect(() => {
     const fetchUser = async () => {
       if (!id) {
-        setError('User ID is missing');
+        toast.error('User ID is missing');
         return;
       }
       try {
@@ -29,10 +28,9 @@ const UpdateUser: React.FC = () => {
         setEmail(fetchedUser.email);
         setPhone(fetchedUser.phone || '');
         setRole(fetchedUser.role);
-        setError('');
+        toast.error('');
       } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'An unknown error occurred');
-        console.error('Fetch user error:', err);
+        toast.error(err instanceof Error ? err.message : 'An unknown error occurred');
       }
     };
     fetchUser();
@@ -50,13 +48,13 @@ const UpdateUser: React.FC = () => {
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) {
-      setError('User ID is missing');
+      toast.error('User ID is missing');
       return;
     }
 
     const validationError = validateProfileForm();
     if (validationError) {
-      setError(validationError);
+      toast.error(validationError);
       return;
     }
 
@@ -69,15 +67,15 @@ const UpdateUser: React.FC = () => {
 
     try {
       const updatedUser: User = await userService.updateUser(id, formData);
-      setSuccess(`User updated successfully: ${updatedUser.name}`);
-      setError('');
+      toast.success(`User updated successfully: ${updatedUser.name}`, { position: "bottom-right" });
+
       setUser(updatedUser);
       setProfileImg(null);
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message);
+        toast.error(err.message, { position: "top-right" });
       } else {
-        setError('An unknown error occurred');
+        toast.error('An unknown error occurred', { position: "top-right" });
       }
     }
   };
@@ -93,29 +91,26 @@ const UpdateUser: React.FC = () => {
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) {
-      setError('User ID is missing');
+      toast.error('User ID is missing');
       return;
     }
 
     const validationError = validatePasswordForm();
     if (validationError) {
-      setError(validationError);
+      toast.error(validationError);
       return;
     }
 
     try {
-      console.log('Updating user password'); // Log action
-      setSuccess('Password updated successfully');
-      setError('');
+      toast.success('Password updated successfully');
       setPassword('');
       setPasswordConfirm('');
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message);
+        toast.error(err.message, { position: "top-right" });
       } else {
-        setError('An unknown error occurred');
+        toast.error('An unknown error occurred');
       }
-      setSuccess('');
     }
   };
 
@@ -124,9 +119,6 @@ const UpdateUser: React.FC = () => {
   return (
     <div className="container-fluid mx-auto p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Update User</h1>
-      {error && <p className="text-red-500 bg-red-100 p-3 rounded mb-6">{error}</p>}
-      {success && <p className="text-green-500 bg-green-100 p-3 rounded mb-6">{success}</p>}
-
       {/* Profile Update */}
       <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
         <h2 className="text-2xl font-semibold mb-4 text-gray-700">Update Personal Information</h2>

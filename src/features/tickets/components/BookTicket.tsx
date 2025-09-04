@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { eventService } from '../../events/services/eventService';
 import type { Event, EventResponse } from '../../events/interfaces/events';
 import type { CreateTicketData, TicketResponse } from '../interfaces/ticket';
 import { bookTicket } from '../services/ticketService';
+import toast from 'react-hot-toast';
 
 const BookTicket: React.FC = () => {
-  const { eventId } = useParams<{ eventId: string }>(); // Get eventId from URL
+  const navigate = useNavigate();
+  const { eventId } = useParams<{ eventId: string }>();
   const [event, setEvent] = useState<Event | null>(null);
   const [formData, setFormData] = useState<CreateTicketData>({
     eventId: eventId || '',
@@ -23,14 +25,12 @@ const BookTicket: React.FC = () => {
     section: 'General',
     row: 'A',
   });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch event details
   useEffect(() => {
     if (!eventId) {
-      setError('Event ID is missing');
+      toast.error('Event ID is missing');
       setIsLoading(false);
       return;
     }
@@ -41,7 +41,7 @@ const BookTicket: React.FC = () => {
         setEvent(response.data);
         setIsLoading(false);
       } catch (err: any) {
-        setError(err.message || 'Failed to fetch event details');
+        toast.error(err.message || 'Failed to fetch event details');
         setIsLoading(false);
       }
     };
@@ -69,8 +69,6 @@ const handleInputChange = (
     });
   }
 };
-
-  // Validate form before submission
   const validateForm = () => {
     if (!formData.seatNumber.trim()) return 'Seat number is required';
     if (!formData.attendeeInfo?.name?.trim().toString()) return 'Attendee name is required';
@@ -88,35 +86,21 @@ const handleInputChange = (
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    toast.error('');
+    toast.success('');
 
     const validationError = validateForm();
     if (validationError) {
-      setError(validationError);
+      toast.error(validationError);
       return;
     }
 
     try {
       const response: TicketResponse = await bookTicket(formData);
-      setSuccess(`Ticket booked successfully: ${response.data.ticketNumber}`);
-      setFormData({
-        eventId: eventId || '',
-        ticketNumber: '',
-        seatNumber: '',
-        paymentMethod: 'card',
-        attendeeInfo: {
-          name: '',
-          email: '',
-          phone: '',
-          age: undefined,
-          gender: undefined,
-        },
-        section: 'General',
-        row: 'A',
-      });
+      toast.success(`Ticket booked successfully: ${response.data.ticketNumber}`);
+      navigate("/tickets")
     } catch (err: any) {
-      setError(err.message || 'Failed to book ticket');
+      toast.error(err.message || 'Failed to book ticket');
     }
   };
 
@@ -125,14 +109,12 @@ const handleInputChange = (
   }
 
   if (!event) {
-    return <div className="text-center p-6 text-red-500 bg-red-100 rounded">{error}</div>;
+    return <div className="text-center p-6 text-red-500 bg-red-100 rounded"></div>;
   }
 
   return (
     <div className="container-fluid mx-auto p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Book Ticket for {event.title}</h1>
-      {error && <p className="text-red-500 bg-red-100 p-3 rounded mb-6">{error}</p>}
-      {success && <p className="text-green-500 bg-green-100 p-3 rounded mb-6">{success}</p>}
       <form onSubmit={handleSubmit} className="bg-white shadow-lg rounded-lg p-6 space-y-6">
         {/* Event Information */}
         <div className="space-y-4">

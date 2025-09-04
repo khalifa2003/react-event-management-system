@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import { userService } from '../services/userService';
 import type { User } from '../interfaces/userTypes';
+import toast from "react-hot-toast";
+import { useNavigate } from 'react-router-dom';
 
 const CreateUser: React.FC = () => {
+  const navigate = useNavigate();
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -10,8 +14,6 @@ const CreateUser: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [role, setRole] = useState<'user' | 'manager' | 'admin'>('user');
   const [profileImg, setProfileImg] = useState<File | null>(null);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   const validateForm = () => {
     if (!name.trim()) return 'Name is required';
@@ -29,7 +31,7 @@ const CreateUser: React.FC = () => {
     e.preventDefault();
     const validationError = validateForm();
     if (validationError) {
-      setError(validationError);
+      toast.error(validationError, { position: "top-right" });
       return;
     }
 
@@ -43,37 +45,29 @@ const CreateUser: React.FC = () => {
     if (profileImg) formData.append('profileImg', profileImg);
 
     try {
-      console.log('Sending create user request with:', { name, email, password, passwordConfirm, phone, role }); // Log payload
       const newUser: User = await userService.createUser(formData);
-      setSuccess(`User created successfully: ${newUser.name}`);
-      setError('');
-      setName('');
-      setEmail('');
-      setPassword('');
-      setPasswordConfirm('');
-      setPhone('');
-      setRole('user');
-      setProfileImg(null);
+      toast.success(`User created successfully: ${newUser.name}`, {
+        position: "bottom-right",
+        duration: 2000,
+      });
+      navigate("/users");
     } catch (err: any) {
       const errorMessage =
         err.response?.data?.errors
-        ? err.response.data.errors.map((e: any) => e.msg).join('; ')
-        : err.message.includes('Image')
-        ? 'Failed to upload image. Please try a smaller file or check server configuration.'
-        : err.message.includes('E-mail already in user')
-        ? 'Email already exists. Please use a different email.'
-        : err.message;
-      setError(errorMessage);
-      setSuccess('');
-      console.error('Create user error:', err.response?.data || err); // Log error
+          ? err.response.data.errors.map((e: any) => e.msg).join('; ')
+          : err.message.includes('Image')
+          ? 'Failed to upload image. Please try a smaller file or check server configuration.'
+          : err.message.includes('E-mail already in user')
+          ? 'Email already exists. Please use a different email.'
+          : err.message;
+
+      toast.error(errorMessage, { position: "bottom-right" });
     }
   };
 
   return (
     <div className="container-fluid bg-white p-4 rounded-lg min-h-screen">
       <h1 className="text-3xl font-bold mb-4">Create New User</h1>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      {success && <p className="text-green-500 mb-4">{success}</p>}
       <form onSubmit={handleSubmit} className="bg-white shadow-md rounded p-4">
         <div className="mb-4">
           <label htmlFor="name" className="block mb-2">Name:</label>

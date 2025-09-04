@@ -71,7 +71,7 @@ const UsersList: React.FC = () => {
   };
 
   return (
-    <div className="container-fluid bg-white rounded-lg mx-auto p-4 max-h-screen h-screen">
+    <div className="container-fluid bg-white rounded-lg mx-auto p-4">
       <h1 className="text-3xl font-bold mb-4">Users List</h1>
       {error && <p className="text-red-500 mb-4">{error}</p>}
       {success && <p className="text-green-500 mb-4">{success}</p>}

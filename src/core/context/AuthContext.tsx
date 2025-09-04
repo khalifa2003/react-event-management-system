@@ -50,7 +50,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const decoded = jwtDecode<User>(token);
         setUser(decoded);
       } catch (error) {
-        console.error("Invalid token", error);
         localStorage.removeItem("token");
       }
     }

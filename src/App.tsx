@@ -8,8 +8,6 @@ import { Toaster } from "react-hot-toast";
 import CategoryManagement from "./features/categories/components/CategoryManagement";
 import CreateUser from "./features/users/components/CreateUser";
 import UpdateUser from "./features/users/components/UpdateUser";
-import AttendeeInsights from "./features/attendence/Attendence";
-import EventAttendeeInsights from "./features/attendenceDetails/AttendenceDetails";
 import CreateCategoryPage from "./features/categories/components/CreateCategory";
 import UpdateCategoryPage from "./features/categories/components/UpdateCategory";
 import Dashboard from "./features/dashboard/components/Dashboard.page";
@@ -45,18 +43,22 @@ function App() {
             <Route path=":id/edit" element={<UpdateEvent />} />
             <Route path=":id" element={<EventDetailsPage />} />
           </Route>
-          <Route path="/attendees/*" element={<DashboardLayout />}>
-            <Route path="" element={<AttendeeInsights />} />
-            <Route path=":id" element={<EventAttendeeInsights />} />
-          </Route>
           <Route path="/tickets/*" element={<DashboardLayout />}>
-          <Route path="" element={<MyTickets />} />
-          <Route path=":eventId/tickets" element={<AllTickets />} />
-          <Route path="book/:eventId" element={<BookTicket />} />
-          <Route path=":id" element={<EventAttendeeInsights />} />
+            <Route path="" element={<MyTickets />} />
+            <Route path=":eventId/tickets" element={<AllTickets />} />
+            <Route path="book/:eventId" element={<BookTicket />} />
           </Route>
+        </Route>
+        <Route path="/users/*" element={<DashboardLayout />}>
+          <Route path="profile" element={<UserProfile />} />
+        </Route>
+        <Route path="/categories/*" element={<DashboardLayout />}>
+          <Route path="" element={<CategoryManagement />} />
+        </Route>
+
+        {/* Routes only for Admin */}
+        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
           <Route path="/categories/*" element={<DashboardLayout />}>
-            <Route path="" element={<CategoryManagement />} />
             <Route path="create" element={<CreateCategoryPage />} />
             <Route path=":id/edit" element={<UpdateCategoryPage />} />
           </Route>
@@ -64,7 +66,7 @@ function App() {
             <Route path="" element={<UsersList />} />
             <Route path="profile" element={<UserProfile />} />
             <Route path="create" element={<CreateUser />} />
-            <Route path=":id/edit" element={<UpdateUser />} /> 
+            <Route path=":id/edit" element={<UpdateUser />} />
           </Route>
         </Route>
 

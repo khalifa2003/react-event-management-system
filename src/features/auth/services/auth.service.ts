@@ -11,16 +11,34 @@ const saveToken = (token: string) => {
   Cookies.set("token", token, { expires: 7, secure: true, sameSite: "Strict" });
 };
 export const isLoggedIn = (): boolean => !!Cookies.get("token");
-export const logoutUser = () => Cookies.remove("token");
+
+export const logoutUser = () => {
+  Cookies.remove("token");
+  localStorage.removeItem("user");
+}
+const saveUser = (user: any) => {
+  localStorage.setItem("user", JSON.stringify(user));
+};
+export const isAdmin = (): boolean => {
+  const user = getUser();
+  return user?.role === "admin";
+};
+export const getUser = (): any | null => {
+  const user = localStorage.getItem("user");
+  return user ? JSON.parse(user) : null;
+};
+
 export const loginUser = (credentials: ILogin): Promise<IAuthResponse> => {
   return api.post<IAuthResponse>("/auth/login", credentials).then((res) => {
     saveToken(res.data.token);
+    saveUser(res.data.data);
     return res.data;
   });
 };
 export const registerUser = (userInfo: IRegister): Promise<IAuthResponse> => {
   return api.post<IAuthResponse>("/auth/signup", userInfo).then((res) => {
     saveToken(res.data.token);
+    saveUser(res.data.data);
     return res.data;
   });
 };
