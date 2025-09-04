@@ -19,6 +19,7 @@ import UserProfile from "./features/users/components/UserProfile";
 import CreateEvent from "./features/events/components/CreateEventPage";
 import EventDetailsPage from "./features/events/components/EventDetails";
 import UpdateEvent from "./features/events/components/UpdateEventPage";
+import BookTicket from "./features/tickets/components/BookTicket";
 function App() {
   return (
     <Router>
@@ -43,6 +44,10 @@ function App() {
           </Route>
           <Route path="/attendees/*" element={<DashboardLayout />}>
             <Route path="" element={<AttendeeInsights />} />
+            <Route path=":id" element={<EventAttendeeInsights />} />
+          </Route>
+          <Route path="/tickets/*" element={<DashboardLayout />}>
+            <Route path="book/:eventId" element={<BookTicket />} />
             <Route path=":id" element={<EventAttendeeInsights />} />
           </Route>
           <Route path="/categories/*" element={<DashboardLayout />}>
