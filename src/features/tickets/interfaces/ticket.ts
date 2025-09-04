@@ -1,3 +1,4 @@
+import type { Event } from "../../events/interfaces/events";
 import type { User } from "../../users/interfaces/userTypes";
 
 export interface AttendeeInfo {
@@ -50,7 +51,7 @@ export interface Metadata {
 export interface Ticket {
   _id: string;
   ticketNumber: string;
-  event: string | Event;
+  event: Event;
   user: string | User;
   attendeeInfo: AttendeeInfo;
   seatInfo: SeatInfo;

@@ -20,6 +20,9 @@ import CreateEvent from "./features/events/components/CreateEventPage";
 import EventDetailsPage from "./features/events/components/EventDetails";
 import UpdateEvent from "./features/events/components/UpdateEventPage";
 import BookTicket from "./features/tickets/components/BookTicket";
+import MyTickets from "./features/tickets/components/MyTickets";
+import AllTickets from "./features/tickets/components/AllTickets";
+
 function App() {
   return (
     <Router>
@@ -47,8 +50,10 @@ function App() {
             <Route path=":id" element={<EventAttendeeInsights />} />
           </Route>
           <Route path="/tickets/*" element={<DashboardLayout />}>
-            <Route path="book/:eventId" element={<BookTicket />} />
-            <Route path=":id" element={<EventAttendeeInsights />} />
+          <Route path="" element={<MyTickets />} />
+          <Route path=":eventId/tickets" element={<AllTickets />} />
+          <Route path="book/:eventId" element={<BookTicket />} />
+          <Route path=":id" element={<EventAttendeeInsights />} />
           </Route>
           <Route path="/categories/*" element={<DashboardLayout />}>
             <Route path="" element={<CategoryManagement />} />

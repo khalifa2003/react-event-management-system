@@ -103,7 +103,7 @@ const UpdateCategoryPage = () => {
   useEffect(() => {
     if (!id) {
       toast.error('Invalid category ID');
-      navigate('/dashboard/categories');
+      navigate('/categories');
       return;
     }
 
@@ -121,7 +121,7 @@ const UpdateCategoryPage = () => {
       } catch (error: any) {
         console.error('Error fetching category:', error);
         toast.error('Failed to load category data');
-        navigate('/dashboard/categories');
+        navigate('/categories');
       } finally {
         setIsLoading(false);
       }
@@ -180,7 +180,7 @@ const UpdateCategoryPage = () => {
       console.log('Submitting update category data:', categoryData);
       await categoryService.updateCategory(categoryData);
       toast.success('Category updated successfully!');
-      navigate('/dashboard/categories');
+      navigate('/categories');
     } catch (error: any) {
       console.error('Error updating category:', {
         message: error.message,
@@ -316,7 +316,7 @@ const UpdateCategoryPage = () => {
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/dashboard/categories')}
+                onClick={() => navigate('/categories')}
                 className="flex-1 px-6 py-3 bg-gray-200 text-gray-900 font-medium rounded-lg hover:bg-gray-300 transition-colors"
               >
                 Cancel

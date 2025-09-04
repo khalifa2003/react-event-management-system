@@ -117,7 +117,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false, onToggle }) => {
               <NavItem icon={Calendar} label="Manage Events" path="/events" collapsed={collapsed} />
               <NavItem icon={Users} label="Attendee Insights" path="/attendees" collapsed={collapsed} />
               <NavItem icon={Users} label="Categories" path="/categories" collapsed={collapsed} />
-              <NavItem icon={Ticket} label="Booking & Tickets" path="/bookings" collapsed={collapsed} />
+              <NavItem icon={Ticket} label="Tickets" path="/tickets" collapsed={collapsed} />
               <NavItem icon={TrendingUp} label="Analytics & Reports" path="/analytics" collapsed={collapsed} />
             </NavSection>
           </div>

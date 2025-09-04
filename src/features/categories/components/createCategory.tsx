@@ -138,7 +138,7 @@ const CreateCategoryPage = () => {
       const categoryData = mapFormDataToCreateCategoryRequest(formData);
       await categoryService.createCategory(categoryData);
       toast.success('Category created successfully!');
-      navigate('/dashboard/categories');
+      navigate('/categories');
     } catch (error: any) {
       const message =
         error.response?.data?.message ||
